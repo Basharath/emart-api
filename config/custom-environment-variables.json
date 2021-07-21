@@ -1,0 +1,4 @@
+{
+  "db": "emart_db",
+  "jwtPrivateKey": "emart_private"
+}
