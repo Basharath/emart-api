@@ -5,6 +5,10 @@ const getCart = async (req, res) => {
   const userId = req.params.id;
   try {
     const cart = await Cart.findOne({ userId });
+    // const cart = await Cart.findOne({ userId }).populate({
+    //   path: 'items.productId',
+    //   select: 'title images',
+    // });
     if (!cart) res.status(404).send('cart is empty');
     return res.send(cart);
   } catch (err) {

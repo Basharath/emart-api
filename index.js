@@ -36,6 +36,11 @@ app.get('/', (req, res) => {
   return res.send('Welcome to the eMart API.');
 });
 
+app.use((req, res) => {
+  console.log('path', req.path);
+  return res.status(404).send('Resource not found!');
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`Started listening at ${PORT}`));
