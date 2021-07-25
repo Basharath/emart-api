@@ -6,28 +6,36 @@ const Joi = require('joi');
 Joi.objectId = require('joi-objectid')(Joi);
 const products = require('./routes/products');
 const cart = require('./routes/cart');
+const categories = require('./routes/categories');
 const users = require('./routes/users');
 
 const app = express();
 const db = config.get('db');
 
-mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false , useCreateIndex: true})
+mongoose
+  .connect(db, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+    useCreateIndex: true,
+  })
   .then(() => console.log('Connected to MongoDb'))
-  .catch(err => console.log(err));
+  .catch((err) => console.log(err));
 
 app.disable('x-powered-by');
 app.use(cors());
 app.use(express.json({ limit: '30mb' }));
-app.use(express.urlencoded({ extended: false, limit: '30mb'}));
+app.use(express.urlencoded({ extended: false, limit: '30mb' }));
 
 app.use('/api/products', products);
 app.use('/api/cart', cart);
+app.use('/api/categories', categories);
 app.use('/api/users', users);
 
 app.get('/', (req, res) => {
-  return res.send('Welcome to the eMart API.')
-})
+  return res.send('Welcome to the eMart API.');
+});
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => console.log(`Started listening at ${PORT}`))
+app.listen(PORT, () => console.log(`Started listening at ${PORT}`));
