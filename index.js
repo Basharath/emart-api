@@ -8,6 +8,7 @@ const products = require('./routes/products');
 const cart = require('./routes/cart');
 const categories = require('./routes/categories');
 const users = require('./routes/users');
+const orders = require('./routes/orders');
 
 const app = express();
 const db = config.get('db');
@@ -31,6 +32,7 @@ app.use('/api/products', products);
 app.use('/api/cart', cart);
 app.use('/api/categories', categories);
 app.use('/api/users', users);
+app.use('/api/orders', orders);
 
 app.get('/', (req, res) => {
   return res.send('Welcome to the eMart API.');
