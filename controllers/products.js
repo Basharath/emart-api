@@ -1,4 +1,5 @@
 const { Product, validate } = require('../models/product');
+const { Category } = require('../models/category');
 
 exports.getProducts = async (req, res) => {
   try {
@@ -13,20 +14,36 @@ exports.postProduct = async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  const { title, description, images, price, offer, stock, rating, seller } =
-    req.body;
-  const product = new Product({
+  const {
     title,
     description,
+    categoryId,
     images,
     price,
     offer,
     stock,
     rating,
     seller,
-  });
+  } = req.body;
 
   try {
+    const category = await Category.findById(categoryId);
+    if (!category) return res.status(400).send('Invalid category');
+
+    const product = new Product({
+      title,
+      description,
+      category: {
+        _id: category._id,
+        name: category.name,
+      },
+      images,
+      price,
+      offer,
+      stock,
+      rating,
+      seller,
+    });
     const data = await product.save();
     return res.status(201).send(data);
   } catch (err) {
@@ -39,15 +56,31 @@ exports.updateProduct = async (req, res) => {
   if (error) return res.status(400).send(error.details[0].message);
 
   const id = req.params.id;
-  const { title, description, images, price, offer, stock, rating, seller } =
-    req.body;
+  const {
+    title,
+    description,
+    categoryId,
+    images,
+    price,
+    offer,
+    stock,
+    rating,
+    seller,
+  } = req.body;
 
   try {
+    const category = await Category.findById(categoryId);
+    if (!category) return res.status(400).send('Invalid category');
+
     const product = await Product.findByIdAndUpdate(
       id,
       {
         title,
         description,
+        category: {
+          _id: category._id,
+          name: category.name,
+        },
         images,
         price,
         offer,

@@ -20,4 +20,5 @@ const validateProduct = (category) => {
 module.exports = {
   Category,
   validate: validateProduct,
+  categorySchema,
 };
