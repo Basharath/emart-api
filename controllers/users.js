@@ -18,7 +18,11 @@ const signIn = async (req, res) => {
       return res.status(400).send('Invalid email or password');
 
     const token = jwt.sign(
-      { email: user.email, isVendor: user.isVendor },
+      {
+        email: user.email,
+        isVendor: user.isVendor,
+        isAdmin: user.isAdmin,
+      },
       config.get('jwtPrivateKey'),
       { expiresIn: '1hr' }
     );
