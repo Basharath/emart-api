@@ -1,6 +1,5 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const config = require('config');
 const { User, validate } = require('../models/user');
 
 const signIn = async (req, res) => {
@@ -23,7 +22,7 @@ const signIn = async (req, res) => {
         isVendor: user.isVendor,
         isAdmin: user.isAdmin,
       },
-      config.get('jwtPrivateKey'),
+      process.env.jwtPrivateKey,
       { expiresIn: '1hr' }
     );
 
@@ -47,7 +46,7 @@ const signUp = async (req, res) => {
 
     await user.save();
 
-    const token = jwt.sign({ email, isVendor }, config.get('jwtPrivateKey'), {
+    const token = jwt.sign({ email, isVendor }, process.env.jwtPrivateKey, {
       expiresIn: '1hr',
     });
 

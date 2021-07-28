@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const config = require('config');
+require('dotenv').config();
 const Joi = require('joi');
 Joi.objectId = require('joi-objectid')(Joi);
 const products = require('./routes/products');
@@ -11,7 +11,7 @@ const users = require('./routes/users');
 const orders = require('./routes/orders');
 
 const app = express();
-const db = config.get('db');
+const db = process.env.db;
 
 mongoose
   .connect(db, {
