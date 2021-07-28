@@ -17,12 +17,12 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
     category: { type: categorySchema, require: true },
-    images: { type: [String], required: true },
+    images: { type: [Object] },
     price: { type: Number, min: 1, required: true },
     offer: { type: Number, min: 1, required: true },
     stock: { type: Number, min: 0, required: true },
     seller: { type: String, required: true },
-    rating: { type: [Object] },
+    rating: { type: [Object], default: [] },
   },
   { versionKey: false }
 );
@@ -34,7 +34,6 @@ const validateProduct = (product) => {
     title: Joi.string().min(5).max(255).required(),
     description: Joi.string().min(20).required(),
     categoryId: Joi.objectId().required(),
-    images: Joi.array().items(Joi.string()),
     price: Joi.number().min(1).required(),
     offer: Joi.number().min(1).required(),
     seller: Joi.string().required(),

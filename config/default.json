@@ -1,4 +1,0 @@
-{
-  "db": "mongodb://localhost/emart",
-  "jwtPrivateKey": "myprivatekey"
-}
