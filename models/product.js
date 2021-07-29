@@ -38,15 +38,26 @@ const validateProduct = (product) => {
     offer: Joi.number().min(1).required(),
     seller: Joi.string().required(),
     stock: Joi.number().min(0).required(),
-    rating: Joi.array().items(
-      Joi.object({ id: Joi.string(), rate: Joi.number() })
-    ),
+    // rating: Joi.array().items(
+    //   Joi.object({ id: Joi.string(), rate: Joi.number() })
+    // ),
+    rating: Joi.array(),
   });
 
   return schema.validate(product);
 };
 
+const validateRating = (obj) => {
+  const schema = Joi.object({
+    id: Joi.objectId().required(),
+    rate: Joi.number().min(1).max(5),
+  });
+
+  return schema.validate(obj);
+};
+
 module.exports = {
   Product,
   validate: validateProduct,
+  validateRating,
 };

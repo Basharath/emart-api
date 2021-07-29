@@ -10,6 +10,7 @@ const {
   updateProduct,
   getProduct,
   deleteProduct,
+  rateProduct,
 } = require('../controllers/products');
 
 router.get('/', getProducts);
@@ -17,5 +18,6 @@ router.post('/', [upload.array('product'), auth, vendor], postProduct);
 router.put('/:id', [upload.array('product'), auth, vendor], updateProduct);
 router.get('/:id', getProduct);
 router.delete('/:id', [auth, vendor], deleteProduct);
+router.patch('/:id', auth, rateProduct);
 
 module.exports = router;
