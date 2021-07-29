@@ -20,7 +20,7 @@ const signIn = async (req, res) => {
       {
         email: user.email,
         isVendor: user.isVendor,
-        isAdmin: user.isAdmin,
+        ...(user.isAdmin && { isAdmin: user.isAdmin }),
       },
       process.env.jwtPrivateKey,
       { expiresIn: '1hr' }
@@ -52,7 +52,6 @@ const signUp = async (req, res) => {
 
     return res.status(201).send({ email, name, isVendor, token });
   } catch (err) {
-    console.log(err);
     return res.status(500).send('Something went wrong');
   }
 };
