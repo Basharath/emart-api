@@ -3,9 +3,10 @@ const { Category, validate } = require('../models/category');
 const getCategories = async (req, res) => {
   try {
     const categories = await Category.find();
+    if (!categories) return res.status(404).send('No categories found');
     return res.send(categories);
   } catch (err) {
-    return res.status(500).send('Something went wrong');
+    return res.status(404).send('Something went wrong');
   }
 };
 
@@ -57,7 +58,9 @@ const deleteCategory = async (req, res) => {
       return res.status(404).send('Category with the given ID is not present');
 
     return res.send(category);
-  } catch (err) {}
+  } catch (err) {
+    return res.status(500).send('Something went wrong');
+  }
 };
 
 module.exports = {

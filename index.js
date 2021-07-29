@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const compression = require('compression');
+const helmet = require('helmet');
 require('dotenv').config();
 const Joi = require('joi');
 Joi.objectId = require('joi-objectid')(Joi);
@@ -9,10 +11,9 @@ const cart = require('./routes/cart');
 const categories = require('./routes/categories');
 const users = require('./routes/users');
 const orders = require('./routes/orders');
-
 const app = express();
-const db = process.env.db;
 
+const db = process.env.db;
 mongoose
   .connect(db, {
     useNewUrlParser: true,
@@ -23,7 +24,8 @@ mongoose
   .then(() => console.log('Connected to MongoDb'))
   .catch((err) => console.log(err));
 
-app.disable('x-powered-by');
+app.use(compression());
+app.use(helmet());
 app.use(cors());
 app.use(express.json({ limit: '30mb' }));
 app.use(express.urlencoded({ extended: false, limit: '30mb' }));
@@ -39,7 +41,6 @@ app.get('/', (req, res) => {
 });
 
 app.use((req, res) => {
-  console.log('path', req.path);
   return res.status(404).send('Resource not found!');
 });
 
