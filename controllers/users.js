@@ -1,8 +1,7 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const { User, validate } = require('../models/user');
 
-const signIn = async (req, res) => {
+const signIn = async (req, res, next) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -10,29 +9,21 @@ const signIn = async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).send('User does not exist');
+    if (!user) return res.status(404).send('Invalid email or password');
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword)
       return res.status(400).send('Invalid email or password');
 
-    const token = jwt.sign(
-      {
-        email: user.email,
-        isVendor: user.isVendor,
-        ...(user.isAdmin && { isAdmin: user.isAdmin }),
-      },
-      process.env.jwtPrivateKey,
-      { expiresIn: '1hr' }
-    );
+    const token = user.generateToken();
 
-    return res.send({ email, id: user._id, token });
+    return res.send({ id: user._id, email, name: user.name, token });
   } catch (err) {
-    return res.status(500).send('Something went wrong');
+    next(err);
   }
 };
 
-const signUp = async (req, res) => {
+const signUp = async (req, res, next) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -46,13 +37,11 @@ const signUp = async (req, res) => {
 
     await user.save();
 
-    const token = jwt.sign({ email, isVendor }, process.env.jwtPrivateKey, {
-      expiresIn: '1hr',
-    });
+    const token = user.generateToken();
 
-    return res.status(201).send({ email, name, isVendor, token });
+    return res.status(201).send({ id: user._id, email, name, token });
   } catch (err) {
-    return res.status(500).send('Something went wrong');
+    next(err);
   }
 };
 
