@@ -6,7 +6,7 @@ const upload = require('../utils/multer');
 
 const {
   getProducts,
-  postProduct,
+  addProduct,
   updateProduct,
   getProduct,
   deleteProduct,
@@ -14,7 +14,7 @@ const {
 } = require('../controllers/products');
 
 router.get('/', getProducts);
-router.post('/', [upload.array('product'), auth, vendor], postProduct);
+router.post('/', [upload.array('product'), auth, vendor], addProduct);
 router.put('/:id', [upload.array('product'), auth, vendor], updateProduct);
 router.get('/:id', getProduct);
 router.delete('/:id', [auth, vendor], deleteProduct);

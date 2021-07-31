@@ -11,7 +11,7 @@ exports.getProducts = async (req, res, next) => {
   }
 };
 
-exports.postProduct = async (req, res, next) => {
+exports.addProduct = async (req, res, next) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
   const { name, description, categoryId, price, offer, stock, seller } =
@@ -22,11 +22,13 @@ exports.postProduct = async (req, res, next) => {
     if (!category) return res.status(400).send('Invalid category');
 
     const images = [];
-    for (let image of req.files) {
-      const result = await cloudinary.uploader.upload(image.path);
-      const url = result.secure_url;
-      const cloudId = result.public_id;
-      images.push({ url, cloudId });
+    if (req.files && req.files.length > 0) {
+      for (let image of req.files) {
+        const result = await cloudinary.uploader.upload(image.path);
+        const url = result.secure_url;
+        const cloudId = result.public_id;
+        images.push({ url, cloudId });
+      }
     }
 
     const product = new Product({
@@ -55,7 +57,7 @@ exports.updateProduct = async (req, res, next) => {
   if (error) return res.status(400).send(error.details[0].message);
 
   const id = req.params.id;
-  const { name, description, categoryId, price, offer, stock, seller } =
+  const { name, description, categoryId, price, offer, images, stock, seller } =
     req.body;
 
   try {
@@ -65,16 +67,18 @@ exports.updateProduct = async (req, res, next) => {
     let product = await Product.findById(id);
     if (!product) return res.status(404).send('Product is not found');
 
-    for (let image of product.images) {
-      await cloudinary.uploader.destroy(image.cloudId);
-    }
+    if (req.files && req.files.length > 0) {
+      for (let image of product.images) {
+        await cloudinary.uploader.destroy(image.cloudId);
+      }
 
-    const images = [];
-    for (let image of req.files) {
-      const result = await cloudinary.uploader.upload(image.path);
-      const url = result.secure_url;
-      const cloudId = result.public_id;
-      images.push({ url, cloudId });
+      images = [];
+      for (let image of req.files) {
+        const result = await cloudinary.uploader.upload(image.path);
+        const url = result.secure_url;
+        const cloudId = result.public_id;
+        images.push({ url, cloudId });
+      }
     }
 
     product = await Product.findByIdAndUpdate(
