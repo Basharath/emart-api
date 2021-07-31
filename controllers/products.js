@@ -2,20 +2,19 @@ const { Product, validate, validateRating } = require('../models/product');
 const { Category } = require('../models/category');
 const cloudinary = require('../utils/cloudinary');
 
-exports.getProducts = async (req, res) => {
+exports.getProducts = async (req, res, next) => {
   try {
     const products = await Product.find();
     return res.send(products);
   } catch (err) {
-    return res.status(404).send('Something went wrong');
+    next(err);
   }
 };
 
-exports.postProduct = async (req, res) => {
-  console.log('body', req.body);
+exports.postProduct = async (req, res, next) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
-  const { title, description, categoryId, price, offer, stock, seller } =
+  const { name, description, categoryId, price, offer, stock, seller } =
     req.body;
 
   try {
@@ -31,7 +30,7 @@ exports.postProduct = async (req, res) => {
     }
 
     const product = new Product({
-      title,
+      name,
       description,
       category: {
         _id: category._id,
@@ -47,16 +46,16 @@ exports.postProduct = async (req, res) => {
     const data = await product.save();
     return res.status(201).send(data);
   } catch (err) {
-    return res.status(409).send('Something went wrong');
+    next(err);
   }
 };
 
-exports.updateProduct = async (req, res) => {
+exports.updateProduct = async (req, res, next) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
   const id = req.params.id;
-  const { title, description, categoryId, price, offer, stock, seller } =
+  const { name, description, categoryId, price, offer, stock, seller } =
     req.body;
 
   try {
@@ -81,7 +80,7 @@ exports.updateProduct = async (req, res) => {
     product = await Product.findByIdAndUpdate(
       id,
       {
-        title,
+        name,
         description,
         category: {
           _id: category._id,
@@ -97,12 +96,11 @@ exports.updateProduct = async (req, res) => {
     );
     return res.send(product);
   } catch (err) {
-    console.log('err', err);
-    return res.status(500).send('Something went wrong');
+    next(err);
   }
 };
 
-exports.getProduct = async (req, res) => {
+exports.getProduct = async (req, res, next) => {
   const productId = req.params.id;
 
   try {
@@ -110,11 +108,11 @@ exports.getProduct = async (req, res) => {
     if (!product) return res.status(404).send('No product found');
     return res.send(product);
   } catch (err) {
-    return res.status(404).send('Something went wrong');
+    next(err);
   }
 };
 
-exports.deleteProduct = async (req, res) => {
+exports.deleteProduct = async (req, res, next) => {
   const productId = req.params.id;
 
   try {
@@ -127,11 +125,11 @@ exports.deleteProduct = async (req, res) => {
     product.deleteOne();
     return res.send(product);
   } catch (err) {
-    return res.status(500).send('Something went wrong');
+    next(err);
   }
 };
 
-exports.rateProduct = async (req, res) => {
+exports.rateProduct = async (req, res, next) => {
   const { error } = validateRating(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -153,6 +151,6 @@ exports.rateProduct = async (req, res) => {
 
     return res.send(product);
   } catch (err) {
-    return res.status(500).send('Something went wrong');
+    next(err);
   }
 };

@@ -4,7 +4,7 @@ const { categorySchema } = require('./category');
 
 const productSchema = new mongoose.Schema(
   {
-    title: {
+    name: {
       type: String,
       trim: true,
       required: true,
@@ -31,7 +31,7 @@ const Product = mongoose.model('Product', productSchema);
 
 const validateProduct = (product) => {
   const schema = Joi.object({
-    title: Joi.string().min(5).max(255).required(),
+    name: Joi.string().min(5).max(255).required(),
     description: Joi.string().min(20).required(),
     categoryId: Joi.objectId().required(),
     price: Joi.number().min(1).required(),
