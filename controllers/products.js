@@ -57,7 +57,9 @@ exports.updateProduct = async (req, res, next) => {
   if (error) return res.status(400).send(error.details[0].message);
 
   const id = req.params.id;
-  const { name, description, categoryId, price, offer, images, stock, seller } =
+  if (!id) return res.status(400).send('Product ID parameter missing');
+
+  let { name, description, categoryId, price, offer, images, stock, seller } =
     req.body;
 
   try {
@@ -68,8 +70,10 @@ exports.updateProduct = async (req, res, next) => {
     if (!product) return res.status(404).send('Product is not found');
 
     if (req.files && req.files.length > 0) {
-      for (let image of product.images) {
-        await cloudinary.uploader.destroy(image.cloudId);
+      if (product.images.length > 0) {
+        for (let image of product.images) {
+          await cloudinary.uploader.destroy(image.cloudId);
+        }
       }
 
       images = [];
@@ -107,6 +111,8 @@ exports.updateProduct = async (req, res, next) => {
 exports.getProduct = async (req, res, next) => {
   const productId = req.params.id;
 
+  if (!productId) return res.status(400).send('Product ID parameter missing');
+
   try {
     const product = await Product.findById(productId);
     if (!product) return res.status(404).send('No product found');
@@ -118,6 +124,8 @@ exports.getProduct = async (req, res, next) => {
 
 exports.deleteProduct = async (req, res, next) => {
   const productId = req.params.id;
+
+  if (!productId) return res.status(400).send('Product ID parameter missing');
 
   try {
     const product = await Product.findById(productId);
@@ -138,6 +146,7 @@ exports.rateProduct = async (req, res, next) => {
   if (error) return res.status(400).send(error.details[0].message);
 
   const productId = req.params.id;
+  if (!productId) return res.status(400).send('Product ID parameter missing');
 
   const { id, rate } = req.body;
   try {

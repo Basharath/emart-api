@@ -4,7 +4,8 @@
   "description": "API for the eMart site.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "nodemon sever.js"
   },
   "keywords": [],
   "author": "basharath",
