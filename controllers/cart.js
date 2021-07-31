@@ -1,8 +1,8 @@
 const { Cart, validate } = require('../models/cart');
 const { Product } = require('../models/product');
 
-const getCart = async (req, res) => {
-  const userId = req.params.id;
+const getCart = async (req, res, next) => {
+  const userId = req.user.id;
   try {
     const cart = await Cart.findOne({ userId });
     // const cart = await Cart.findOne({ userId }).populate({
@@ -12,13 +12,13 @@ const getCart = async (req, res) => {
     if (!cart) res.status(404).send('cart is empty');
     return res.send(cart);
   } catch (err) {
-    return res.status(404).json({ message: err.message });
+    next(err);
   }
 };
 
-const updateCart = async (req, res) => {
+const updateCart = async (req, res, next) => {
   const { productId, quantity } = req.body;
-  const userId = req.params.id;
+  const userId = req.user.id;
 
   const { error } = validate({ productId, quantity, userId });
   if (error) return res.status(400).send(error.details[0].message);
@@ -65,13 +65,12 @@ const updateCart = async (req, res) => {
     const cartData = await cart.save();
     return res.send(cartData);
   } catch (err) {
-    console.log(err);
-    return res.status(500).send('Something went wrong');
+    next(err);
   }
 };
 
-const clearCart = async (req, res) => {
-  const userId = req.params.id;
+const clearCart = async (req, res, next) => {
+  const userId = req.user.id;
 
   try {
     const cart = await Cart.findOne({ userId });
@@ -80,7 +79,7 @@ const clearCart = async (req, res) => {
     const cartData = await cart.save();
     return res.send(cartData);
   } catch (err) {
-    return res.status(500).send('Something went wrong');
+    next(err);
   }
 };
 

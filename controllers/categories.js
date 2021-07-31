@@ -1,16 +1,16 @@
 const { Category, validate } = require('../models/category');
 
-const getCategories = async (req, res) => {
+const getCategories = async (req, res, next) => {
   try {
     const categories = await Category.find();
     if (!categories) return res.status(404).send('No categories found');
     return res.send(categories);
   } catch (err) {
-    return res.status(404).send('Something went wrong');
+    next(err);
   }
 };
 
-const addCategory = async (req, res) => {
+const addCategory = async (req, res, next) => {
   const { error } = validate(req.body);
   if (error) res.status(400).send(error.details[0].message);
 
@@ -22,11 +22,11 @@ const addCategory = async (req, res) => {
 
     return res.send(category);
   } catch (err) {
-    return res.status(500).send('Something went wrong');
+    next(err);
   }
 };
 
-const updateCategory = async (req, res) => {
+const updateCategory = async (req, res, next) => {
   const { error } = validate(req.body);
   if (error) res.status(400).send(error.details[0].message);
 
@@ -45,11 +45,11 @@ const updateCategory = async (req, res) => {
 
     return res.send(category);
   } catch (err) {
-    return res.status(500).send('Something went wrong');
+    next(err);
   }
 };
 
-const deleteCategory = async (req, res) => {
+const deleteCategory = async (req, res, next) => {
   const categoryId = req.params.id;
 
   try {
@@ -59,7 +59,7 @@ const deleteCategory = async (req, res) => {
 
     return res.send(category);
   } catch (err) {
-    return res.status(500).send('Something went wrong');
+    next(err);
   }
 };
 

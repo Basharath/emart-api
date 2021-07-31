@@ -1,7 +1,7 @@
 const { Order, validate } = require('../models/order');
 
-const getOrders = async (req, res) => {
-  const userId = req.params.id;
+const getOrders = async (req, res, next) => {
+  const userId = req.user.id;
   const orderId = req.query.id;
 
   try {
@@ -16,11 +16,11 @@ const getOrders = async (req, res) => {
 
     return res.send(orders);
   } catch (err) {
-    return res.status(500).send(err.message);
+    next(err);
   }
 };
 
-const postOrder = async (req, res) => {
+const postOrder = async (req, res, next) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -35,12 +35,12 @@ const postOrder = async (req, res) => {
 
     return res.send(orderData);
   } catch (err) {
-    return res.status(500).send(err.message);
+    next(err);
   }
 };
 
-const cancelOrder = async (req, res) => {
-  const orderId = req.params.id;
+const cancelOrder = async (req, res, next) => {
+  const orderId = req.query.id;
 
   try {
     const order = await Order.findByIdAndDelete(orderId);
@@ -48,7 +48,7 @@ const cancelOrder = async (req, res) => {
 
     return res.send(order);
   } catch (err) {
-    return res.status(500).send(err.message);
+    next(err);
   }
 };
 
