@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const db = process.env.db;
+const { db } = process.env;
 
 module.exports = () => {
   mongoose

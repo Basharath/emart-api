@@ -17,7 +17,7 @@ const signIn = async (req, res, next) => {
 
     const token = user.generateToken();
 
-    return res.send({ id: user._id, email, name: user.name, token });
+    return res.send({ token });
   } catch (err) {
     next(err);
   }
@@ -39,7 +39,7 @@ const signUp = async (req, res, next) => {
 
     const token = user.generateToken();
 
-    return res.status(201).send({ id: user._id, email, name, token });
+    return res.status(201).send({ id: user._id, email, token });
   } catch (err) {
     next(err);
   }

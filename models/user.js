@@ -16,12 +16,13 @@ const userSchema = new mongoose.Schema({
   password: { type: String, minlength: 8, maxlength: 1024, required: true },
 });
 
-userSchema.methods.generateToken = function () {
+userSchema.methods.generateToken = function genToken() {
   const token = jwt.sign(
     {
       id: this._id,
       isVendor: this.isVendor,
       isAdmin: this.isAdmin,
+      name: this.name,
     },
     process.env.jwtPrivateKey,
     {
