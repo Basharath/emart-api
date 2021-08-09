@@ -9,7 +9,7 @@ const getCart = async (req, res, next) => {
     //   path: 'items.productId',
     //   select: 'title images',
     // });
-    if (!cart) res.status(404).send('cart is empty');
+    if (!cart) return res.status(404).send('cart is empty');
     return res.send(cart);
   } catch (err) {
     next(err);
