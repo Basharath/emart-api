@@ -23,7 +23,7 @@ exports.addProduct = async (req, res, next) => {
 
     const images = [];
     if (req.files && req.files.length > 0) {
-      for (let image of req.files) {
+      for (const image of req.files) {
         const result = await cloudinary.uploader.upload(image.path);
         const url = result.secure_url;
         const cloudId = result.public_id;
@@ -56,11 +56,19 @@ exports.updateProduct = async (req, res, next) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  const id = req.params.id;
+  const { id } = req.params;
   if (!id) return res.status(400).send('Product ID parameter missing');
 
-  let { name, description, categoryId, price, offer, images, stock, seller } =
-    req.body;
+  const {
+    name,
+    description,
+    categoryId,
+    price,
+    offer,
+    // images = [],
+    stock,
+    seller,
+  } = req.body;
 
   try {
     const category = await Category.findById(categoryId);
@@ -69,15 +77,15 @@ exports.updateProduct = async (req, res, next) => {
     let product = await Product.findById(id);
     if (!product) return res.status(404).send('Product is not found');
 
+    const images = [];
     if (req.files && req.files.length > 0) {
       if (product.images.length > 0) {
-        for (let image of product.images) {
+        for (const image of product.images) {
           await cloudinary.uploader.destroy(image.cloudId);
         }
       }
 
-      images = [];
-      for (let image of req.files) {
+      for (const image of req.files) {
         const result = await cloudinary.uploader.upload(image.path);
         const url = result.secure_url;
         const cloudId = result.public_id;
@@ -94,7 +102,7 @@ exports.updateProduct = async (req, res, next) => {
           _id: category._id,
           name: category.name,
         },
-        images,
+        ...(images.length > 0 && { images }),
         price: +price,
         offer: +offer,
         stock: +stock,
@@ -131,7 +139,7 @@ exports.deleteProduct = async (req, res, next) => {
     const product = await Product.findById(productId);
     if (!product) return res.status(404).send('No product with the given ID');
 
-    for (let image of product.images) {
+    for (const image of product.images) {
       image.cloudId && (await cloudinary.uploader.destroy(image.cloudId));
     }
     product.deleteOne();
