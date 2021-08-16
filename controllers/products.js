@@ -3,8 +3,13 @@ const { Category } = require('../models/category');
 const cloudinary = require('../utils/cloudinary');
 
 exports.getProducts = async (req, res, next) => {
+  const userId = req.query.user;
+
   try {
-    const products = await Product.find();
+    const products = userId
+      ? await Product.find({ userId })
+      : await Product.find();
+
     return res.send(products);
   } catch (err) {
     next(err);
@@ -17,6 +22,7 @@ exports.addProduct = async (req, res, next) => {
   const { name, description, categoryId, price, offer, stock, seller } =
     req.body;
 
+  const userId = req.user.id;
   try {
     const category = await Category.findById(categoryId);
     if (!category) return res.status(400).send('Invalid category');
@@ -24,7 +30,9 @@ exports.addProduct = async (req, res, next) => {
     const images = [];
     if (req.files && req.files.length > 0) {
       for (const image of req.files) {
-        const result = await cloudinary.uploader.upload(image.path);
+        const result = await cloudinary.uploader.upload(image.path, {
+          folder: 'emart',
+        });
         const url = result.secure_url;
         const cloudId = result.public_id;
         images.push({ url, cloudId });
@@ -43,6 +51,7 @@ exports.addProduct = async (req, res, next) => {
       offer: +offer,
       stock: +stock,
       seller,
+      userId,
     });
 
     const data = await product.save();
@@ -58,6 +67,7 @@ exports.updateProduct = async (req, res, next) => {
 
   const { id } = req.params;
   if (!id) return res.status(400).send('Product ID parameter missing');
+  const { id: userId, isAdmin } = req.user;
 
   const {
     name,
@@ -76,6 +86,8 @@ exports.updateProduct = async (req, res, next) => {
 
     let product = await Product.findById(id);
     if (!product) return res.status(404).send('Product is not found');
+    if (userId !== product.userId && !isAdmin)
+      return res.status(403).send('You can not update the product');
 
     const images = [];
     if (req.files && req.files.length > 0) {
@@ -86,7 +98,9 @@ exports.updateProduct = async (req, res, next) => {
       }
 
       for (const image of req.files) {
-        const result = await cloudinary.uploader.upload(image.path);
+        const result = await cloudinary.uploader.upload(image.path, {
+          folder: 'emart',
+        });
         const url = result.secure_url;
         const cloudId = result.public_id;
         images.push({ url, cloudId });
@@ -132,12 +146,15 @@ exports.getProduct = async (req, res, next) => {
 
 exports.deleteProduct = async (req, res, next) => {
   const productId = req.params.id;
+  const { id, isAdmin } = req.user;
 
   if (!productId) return res.status(400).send('Product ID parameter missing');
 
   try {
     const product = await Product.findById(productId);
     if (!product) return res.status(404).send('No product with the given ID');
+    if (id !== product.userId && !isAdmin)
+      return res.status(403).send('You can not delete the product');
 
     for (const image of product.images) {
       image.cloudId && (await cloudinary.uploader.destroy(image.cloudId));
