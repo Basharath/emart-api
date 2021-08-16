@@ -23,6 +23,11 @@ const productSchema = new mongoose.Schema(
     stock: { type: Number, min: 0, required: true },
     seller: { type: String, required: true },
     rating: { type: [Object], default: [] },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
   },
   { versionKey: false }
 );
