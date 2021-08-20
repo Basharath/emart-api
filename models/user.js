@@ -3,12 +3,20 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, minlength: 5, maxlength: 50, required: true },
+  name: {
+    type: String,
+    minlength: 5,
+    maxlength: 50,
+    trim: true,
+    required: true,
+  },
   email: {
     type: String,
     unique: true,
     minlength: 4,
     maxlength: 255,
+    trim: true,
+    lowercase: true,
     required: true,
   },
   isVendor: { type: Boolean, default: false },
