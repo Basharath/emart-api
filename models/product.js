@@ -43,7 +43,7 @@ const validateProduct = (product) => {
     offer: Joi.number().min(1).required().label('Discounted price'),
     seller: Joi.string().required().label('Seller name'),
     stock: Joi.number().min(0).required().label('Stock'),
-    images: Joi.array(),
+    images: Joi.string(),
     // rating: Joi.array().items(
     //   Joi.object({ id: Joi.string(), rate: Joi.number() })
     // ),

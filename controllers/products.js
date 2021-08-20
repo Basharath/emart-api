@@ -69,17 +69,10 @@ exports.updateProduct = async (req, res, next) => {
   if (!id) return res.status(400).send('Product ID parameter missing');
   const { id: userId, isAdmin } = req.user;
 
-  const {
-    name,
-    description,
-    categoryId,
-    price,
-    offer,
-    // images = [],
-    stock,
-    seller,
-  } = req.body;
+  const { name, description, categoryId, price, offer, stock, seller } =
+    req.body;
 
+  let images = JSON.parse(req.body.images) || [];
   try {
     const category = await Category.findById(categoryId);
     if (!category) return res.status(400).send('Invalid category');
@@ -89,21 +82,25 @@ exports.updateProduct = async (req, res, next) => {
     if (userId !== product.userId && !isAdmin)
       return res.status(403).send('You can not update the product');
 
-    const images = [];
-    if (req.files && req.files.length > 0) {
-      if (product.images.length > 0) {
-        for (const image of product.images) {
-          await cloudinary.uploader.destroy(image.cloudId);
-        }
+    if (req.files) {
+      if (images.length !== product.images.length) {
+        const deletedImages = product.images.filter((p) =>
+          images.every((i) => i.cloudId !== p.cloudId)
+        );
+        deletedImages.forEach(
+          async (i) => await cloudinary.uploader.destroy(i.cloudId)
+        );
       }
 
-      for (const image of req.files) {
-        const result = await cloudinary.uploader.upload(image.path, {
-          folder: 'emart',
-        });
-        const url = result.secure_url;
-        const cloudId = result.public_id;
-        images.push({ url, cloudId });
+      if (req.files.length > 0) {
+        for (const image of req.files) {
+          const result = await cloudinary.uploader.upload(image.path, {
+            folder: 'emart',
+          });
+          const url = result.secure_url;
+          const cloudId = result.public_id;
+          images.push({ url, cloudId });
+        }
       }
     }
 
