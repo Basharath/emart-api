@@ -22,8 +22,13 @@ exports.addProduct = async (req, res, next) => {
   const { name, description, categoryId, price, offer, stock, seller } =
     req.body;
 
-  const userId = req.user.id;
+  const { id: userId, isAdmin } = req.user;
+  const LIMIT = process.env.productLimit || 4;
   try {
+    const products = await Product.find({ userId });
+    if (products.length >= LIMIT && !isAdmin)
+      return res.status(403).send('Your product limit is reached');
+
     const category = await Category.findById(categoryId);
     if (!category) return res.status(400).send('Invalid category');
 
@@ -79,7 +84,8 @@ exports.updateProduct = async (req, res, next) => {
 
     let product = await Product.findById(id);
     if (!product) return res.status(404).send('Product is not found');
-    if (userId !== product.userId && !isAdmin)
+
+    if (userId.toString() !== product.userId.toString() && !isAdmin)
       return res.status(403).send('You can not update the product');
 
     if (req.files) {
@@ -143,14 +149,14 @@ exports.getProduct = async (req, res, next) => {
 
 exports.deleteProduct = async (req, res, next) => {
   const productId = req.params.id;
-  const { id, isAdmin } = req.user;
+  const { id: userId, isAdmin } = req.user;
 
   if (!productId) return res.status(400).send('Product ID parameter missing');
 
   try {
     const product = await Product.findById(productId);
     if (!product) return res.status(404).send('No product with the given ID');
-    if (id !== product.userId && !isAdmin)
+    if (userId.toString() !== product.userId.toString() && !isAdmin)
       return res.status(403).send('You can not delete the product');
 
     for (const image of product.images) {
