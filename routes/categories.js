@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const validateObjectId = require('../middleware/validateObjectId');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 
@@ -13,8 +14,8 @@ router.get('/', getCategories);
 
 router.post('/', [auth, admin], addCategory);
 
-router.put('/:id', [auth, admin], updateCategory);
+router.put('/:id', [validateObjectId, auth, admin], updateCategory);
 
-router.delete('/:id', [auth, admin], deleteCategory);
+router.delete('/:id', [validateObjectId, auth, admin], deleteCategory);
 
 module.exports = router;
