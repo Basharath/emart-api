@@ -3,7 +3,7 @@ const Joi = require('joi');
 
 const itemSchema = new mongoose.Schema(
   {
-    productId: {
+    product: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Product',
       required: true,
@@ -38,7 +38,7 @@ const Cart = mongoose.model('Cart', cartSchema);
 const validateCart = (cart) => {
   const schema = Joi.object({
     userId: Joi.objectId().required(),
-    productId: Joi.objectId().required(),
+    product: Joi.objectId().required(),
     quantity: Joi.number().min(0).required(),
   });
 
