@@ -7,7 +7,7 @@ const getCart = async (req, res, next) => {
     // const cart = await Cart.findOne({ userId });
     const cart = await Cart.findOne({ userId }).populate({
       path: 'items.product',
-      select: 'name images seller',
+      select: 'name images seller price',
     });
     if (!cart) return res.status(404).send('cart is empty');
     return res.send(cart);
@@ -24,10 +24,7 @@ const updateCart = async (req, res, next) => {
   if (error) return res.status(400).send(error.details[0].message);
 
   try {
-    let cart = await Cart.findOne({ userId }).populate({
-      path: 'items.product',
-      select: 'name images',
-    });
+    let cart = await Cart.findOne({ userId });
     const product = await Product.findById(productId);
     if (!product) return res.status(500).send('Product not found');
 
@@ -42,21 +39,24 @@ const updateCart = async (req, res, next) => {
           },
         ],
       };
-      // cart = new Cart.populate(cartData, 'items.product');
       cart = new Cart(cartData);
 
       cart = await cart.save();
-      const data = await cart.populate('items.product').execPopulate();
+      const data = await cart
+        .populate({
+          path: 'items.product',
+          select: 'name images seller price',
+        })
+        .execPopulate();
       return res.status(201).send(data);
     }
 
     const index = cart.items.findIndex(
-      (i) => i.product._id.toString() === productId.toString()
+      (i) => i.product.toString() === productId.toString()
     );
 
     if (index !== -1 && quantity > 0) {
-      cart.items[index].quantity += quantity;
-      // cart.items[index].price = product.offer;
+      cart.items[index].quantity = +quantity;
     } else if (index === -1 && quantity > 0) {
       cart.items.push({
         product: productId,
@@ -68,7 +68,12 @@ const updateCart = async (req, res, next) => {
     } else return res.status(400).send('Invalid request');
 
     cart = await cart.save();
-    const cartData = await cart.populate('items.product').execPopulate();
+    const cartData = await cart
+      .populate({
+        path: 'items.product',
+        select: 'name images seller price',
+      })
+      .execPopulate();
     return res.send(cartData);
   } catch (err) {
     next(err);
