@@ -1,4 +1,8 @@
+const stripe = require('stripe')(process.env.stripePrivateKey);
 const { Order, validate } = require('../models/order');
+const { Cart } = require('../models/cart');
+
+const checkoutURL = process.env.checkoutURL;
 
 const getOrders = async (req, res, next) => {
   const userId = req.user.id;
@@ -20,18 +24,64 @@ const getOrders = async (req, res, next) => {
   }
 };
 
+const checkoutCart = async (req, res, next) => {
+  const products = req.body;
+
+  const line_items = products.map((p) => {
+    return {
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: p.product.name,
+        },
+        unit_amount: p.price * 100,
+      },
+      quantity: p.quantity,
+    };
+  });
+
+  const session = await stripe.checkout.sessions.create({
+    line_items,
+    payment_method_types: ['card'],
+    mode: 'payment',
+    success_url: `${checkoutURL}?status=true&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${checkoutURL}?status=false`,
+  });
+
+  return res.send(session.url);
+};
+
 const postOrder = async (req, res, next) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  const { userId, products } = req.body;
+  const userId = req.user.id;
+  const products = req.body;
+  const sessionId = req.query.session_id;
   try {
-    const order = new Order({
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    // const customer = await stripe.customers.retrieve(session.customer);
+    if (!session) return res.status(400).send('Invalid payment session');
+
+    let order = new Order({
       userId,
       products,
     });
 
-    const orderData = await order.save();
+    order = await order.save();
+
+    const cart = await Cart.findOne({ userId });
+    if (cart) {
+      cart.items = [];
+      await cart.save();
+    }
+
+    const orderData = await order
+      .populate({
+        path: 'products.product',
+        select: 'name images price',
+      })
+      .execPopulate();
 
     return res.send(orderData);
   } catch (err) {
@@ -54,6 +104,7 @@ const cancelOrder = async (req, res, next) => {
 
 module.exports = {
   getOrders,
+  checkoutCart,
   postOrder,
   cancelOrder,
 };
