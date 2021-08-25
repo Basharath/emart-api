@@ -13,7 +13,7 @@ const getOrders = async (req, res, next) => {
     if (orderId)
       orders = await Order.findById(orderId).populate(
         'products.product',
-        'title category'
+        'name images'
       );
     else orders = await Order.find({ userId });
     if (!orders) return res.status(404).send('No orders found');
@@ -32,7 +32,7 @@ const checkoutCart = async (req, res, next) => {
       price_data: {
         currency: 'usd',
         product_data: {
-          name: p.product.name,
+          name: p.name,
         },
         unit_amount: p.price * 100,
       },
@@ -52,17 +52,20 @@ const checkoutCart = async (req, res, next) => {
 };
 
 const postOrder = async (req, res, next) => {
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
+  // const { error } = validate(req.body);
+  // if (error) return res.status(400).send(error.details[0].message);
 
   const userId = req.user.id;
-  const products = req.body;
   const sessionId = req.query.session_id;
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     // const customer = await stripe.customers.retrieve(session.customer);
     if (!session) return res.status(400).send('Invalid payment session');
 
+    const cartData = await Cart.findOne({ userId });
+    const products = cartData.items;
+
+    if (!products.length > 0) return null;
     let order = new Order({
       userId,
       products,
