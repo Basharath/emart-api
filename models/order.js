@@ -38,18 +38,15 @@ const orderSchema = new mongoose.Schema(
 const Order = mongoose.model('Order', orderSchema);
 
 const validateOrder = (order) => {
-  const schema = Joi.object({
-    products: Joi.array()
-      .items(
-        Joi.object({
-          product: Joi.objectId().required(),
-          quantity: Joi.number().required(),
-          price: Joi.number().min(1).required(),
-        })
-      )
-      .required(),
-    userId: Joi.objectId().required(),
-  });
+  const schema = Joi.array()
+    .items(
+      Joi.object({
+        product: Joi.objectId().required(),
+        quantity: Joi.number().required(),
+        price: Joi.number().min(1).required(),
+      })
+    )
+    .required();
 
   return schema.validate(order);
 };
