@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Joi = require('joi');
+// const Joi = require('joi');
 
 const productSchema = new mongoose.Schema(
   {
@@ -37,21 +37,21 @@ const orderSchema = new mongoose.Schema(
 
 const Order = mongoose.model('Order', orderSchema);
 
-const validateOrder = (order) => {
-  const schema = Joi.array()
-    .items(
-      Joi.object({
-        product: Joi.objectId().required(),
-        quantity: Joi.number().required(),
-        price: Joi.number().min(1).required(),
-      })
-    )
-    .required();
+// const validateOrder = (order) => {
+//   const schema = Joi.array()
+//     .items(
+//       Joi.object({
+//         product: Joi.objectId().required(),
+//         quantity: Joi.number().required(),
+//         price: Joi.number().min(1).required(),
+//       })
+//     )
+//     .required();
 
-  return schema.validate(order);
-};
+//   return schema.validate(order);
+// };
 
 module.exports = {
   Order,
-  validate: validateOrder,
+  // validate: validateOrder,
 };

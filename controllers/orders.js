@@ -1,21 +1,17 @@
 const stripe = require('stripe')(process.env.stripePrivateKey);
-const { Order, validate } = require('../models/order');
+const { Order } = require('../models/order');
 const { Cart } = require('../models/cart');
 
 const checkoutURL = process.env.checkoutURL;
 
 const getOrders = async (req, res, next) => {
   const userId = req.user.id;
-  const orderId = req.query.id;
 
   try {
-    let orders;
-    if (orderId)
-      orders = await Order.findById(orderId).populate(
-        'products.product',
-        'name images'
-      );
-    else orders = await Order.find({ userId });
+    const orders = await Order.find({ userId }).populate(
+      'products.product',
+      'name images'
+    );
     if (!orders) return res.status(404).send('No orders found');
 
     return res.send(orders);
@@ -24,7 +20,23 @@ const getOrders = async (req, res, next) => {
   }
 };
 
-const checkoutCart = async (req, res, next) => {
+const getOrder = async (req, res, next) => {
+  const orderId = req.params.id;
+
+  try {
+    const order = await Order.findById(orderId).populate(
+      'products.product',
+      'name images'
+    );
+    if (!order) return res.status(404).send('No order found');
+
+    return res.send(order);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const checkoutCart = async (req, res) => {
   const products = req.body;
 
   const line_items = products.map((p) => {
@@ -63,21 +75,15 @@ const postOrder = async (req, res, next) => {
     if (!session) return res.status(400).send('Invalid payment session');
 
     const cartData = await Cart.findOne({ userId });
-    const products = cartData.items;
+    const products = cartData && cartData.items;
 
-    if (!products.length > 0) return null;
+    if (!products.length > 0) return res.status(400).send('Bad request');
     let order = new Order({
       userId,
       products,
     });
 
     order = await order.save();
-
-    const cart = await Cart.findOne({ userId });
-    if (cart) {
-      cart.items = [];
-      await cart.save();
-    }
 
     const orderData = await order
       .populate({
@@ -93,7 +99,7 @@ const postOrder = async (req, res, next) => {
 };
 
 const cancelOrder = async (req, res, next) => {
-  const orderId = req.query.id;
+  const orderId = req.params.id;
 
   try {
     const order = await Order.findByIdAndDelete(orderId);
@@ -107,6 +113,7 @@ const cancelOrder = async (req, res, next) => {
 
 module.exports = {
   getOrders,
+  getOrder,
   checkoutCart,
   postOrder,
   cancelOrder,
