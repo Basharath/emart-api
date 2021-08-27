@@ -8,10 +8,9 @@ const getOrders = async (req, res, next) => {
   const userId = req.user.id;
 
   try {
-    const orders = await Order.find({ userId }).populate(
-      'products.product',
-      'name images'
-    );
+    const orders = await Order.find({ userId })
+      .populate('products.product', 'name images')
+      .sort('-date');
     if (!orders) return res.status(404).send('No orders found');
 
     return res.send(orders);
@@ -64,9 +63,6 @@ const checkoutCart = async (req, res) => {
 };
 
 const postOrder = async (req, res, next) => {
-  // const { error } = validate(req.body);
-  // if (error) return res.status(400).send(error.details[0].message);
-
   const userId = req.user.id;
   const sessionId = req.query.session_id;
   try {
