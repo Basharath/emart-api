@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-// const Joi = require('joi');
+const dayjs = require('dayjs');
 
 const productSchema = new mongoose.Schema(
   {
@@ -29,7 +29,10 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
     products: [productSchema],
-    delivered: { type: Boolean, default: false },
+    deliveryDate: {
+      type: Date,
+      default: () => dayjs().add(Math.floor(Math.random() * 3 + 1), 'day'),
+    },
     date: { type: Date, default: new Date() },
   },
   { versionKey: false }
@@ -37,21 +40,6 @@ const orderSchema = new mongoose.Schema(
 
 const Order = mongoose.model('Order', orderSchema);
 
-// const validateOrder = (order) => {
-//   const schema = Joi.array()
-//     .items(
-//       Joi.object({
-//         product: Joi.objectId().required(),
-//         quantity: Joi.number().required(),
-//         price: Joi.number().min(1).required(),
-//       })
-//     )
-//     .required();
-
-//   return schema.validate(order);
-// };
-
 module.exports = {
   Order,
-  // validate: validateOrder,
 };
