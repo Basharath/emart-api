@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
   },
   isVendor: { type: Boolean, default: false },
   isAdmin: { type: Boolean, default: false },
-  password: { type: String, minlength: 8, maxlength: 1024, required: true },
+  password: { type: String, minlength: 8, maxlength: 1024 },
 });
 
 userSchema.methods.generateToken = function genToken() {
