@@ -53,7 +53,17 @@ const validateUser = (user) => {
   return schema.validate(user);
 };
 
+const validatePassword = (password) => {
+  const schema = Joi.object({
+    oldPassword: Joi.string().min(8).max(15).label('Old password'),
+    newPassword: Joi.string().min(8).max(15).required().label('New password'),
+  });
+
+  return schema.validate(password);
+};
+
 module.exports = {
   User,
   validate: validateUser,
+  validatePassword,
 };
