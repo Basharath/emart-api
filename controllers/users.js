@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
-const { User, validate } = require('../models/user');
+const { User, validate, validatePassword } = require('../models/user');
+const { Cart } = require('../models/cart');
 
 const signIn = async (req, res, next) => {
   const { error } = validate(req.body);
@@ -37,6 +38,9 @@ const signUp = async (req, res, next) => {
 
     await user.save();
 
+    const cart = new Cart({ userId: user._id, items: [] });
+    cart.save();
+
     const token = user.generateToken();
 
     return res.status(201).send({ id: user._id, email, token });
@@ -45,7 +49,33 @@ const signUp = async (req, res, next) => {
   }
 };
 
+const changePassword = async (req, res, next) => {
+  const { error } = validatePassword(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+  const { id } = req.user;
+
+  const { oldPassword, newPassword } = req.body;
+  try {
+    let user = await User.findById(id);
+    if (!user) return res.status(404).send("User doesn't exists");
+
+    if (user.password) {
+      const validPassword = await bcrypt.compare(oldPassword, user.password);
+      if (!validPassword) return res.status(400).send('Incorrect old password');
+    }
+
+    user.password = await bcrypt.hash(newPassword, 12);
+
+    await user.save();
+
+    return res.send('Successfully changed password!');
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   signIn,
   signUp,
+  changePassword,
 };
