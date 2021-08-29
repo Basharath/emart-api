@@ -169,6 +169,23 @@ exports.deleteProduct = async (req, res, next) => {
   }
 };
 
+exports.searchProducts = async (req, res, next) => {
+  const q = req.query.q;
+
+  try {
+    const products = await Product.find({
+      $or: [
+        { name: new RegExp(q, 'gi') },
+        { description: new RegExp(q, 'gi') },
+      ],
+    });
+
+    return res.send(products);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.rateProduct = async (req, res, next) => {
   const { error } = validateRating(req.body);
   if (error) return res.status(400).send(error.details[0].message);
