@@ -2,7 +2,7 @@
 
 The eMart API consists of five main end points/paths:
 
-| Base URL: /api
+> Base URL: /api
 
 - /users
 - /products
@@ -57,4 +57,4 @@ POST - /cart/checkout
 DELETE - /cart
 ```
 
-| The website made using this API is: https://emart2shop.netlify.app/
+> The website made using this API is: https://emart2shop.netlify.app/
